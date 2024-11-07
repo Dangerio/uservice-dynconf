@@ -79,7 +79,11 @@ paths:
     /admin/v1/configs:
         post:
             description: |
-                Handle for adding (editing) configs
+                Handle for adding (editing) configs.
+                Changes (sets) config values and optionally their Kill Switch flags.
+                The configs specified in kill_switches_disabled and kill_switches_enabled
+                become disabled and enabled kill switches, respectively.
+                The rest become regular dynamic configs.
             requestBody:
                 description: |
                     Config parameters (you can add bulk)
@@ -97,6 +101,22 @@ paths:
                                     description: |
                                         Map key-values, config name and its value,
                                         you can have multiple configs at the same time
+                                kill_switches_enabled:
+                                    type: array
+                                    description: | 
+                                        Enabled Kill Switches,
+                                        must consist of ids from configs
+                                    items:
+                                        type: string
+                                        description: Config id
+                                kill_switches_disabled:
+                                    type: array
+                                    description: | 
+                                        Disabled Kill Switches,
+                                        must consist of ids from configs
+                                    items:
+                                        type: string
+                                        description: Config id
                                 service:
                                     type: string
                                     description: The name of the service to create/update for configs for
