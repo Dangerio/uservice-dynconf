@@ -13,6 +13,10 @@ paths:
         post:
             description: |
                 A handle for getting config values.
+                Returns configs changed since updated_since and last update time.
+                If any changed configs are Kill Switches,
+                returns additional lists of enabled and disabled Kill Switches.
+                A config with a changed Kill Switch flag is considered changed.
             requestBody:
                 description: |
                     Parameters for config values
@@ -50,15 +54,15 @@ paths:
                                           type: object
                                           additionalProperties: true
                                           description: Map of received configs
-                                      kill_switches_disabled:
-                                          type: array
-                                          description: Disabled Kill Switches
-                                          items:
-                                              type: string
-                                              description: Config id
                                       kill_switches_enabled:
                                           type: array
                                           description: Enabled Kill Switches
+                                          items:
+                                              type: string
+                                              description: Config id
+                                      kill_switches_disabled:
+                                          type: array
+                                          description: Disabled Kill Switches
                                           items:
                                               type: string
                                               description: Config id
