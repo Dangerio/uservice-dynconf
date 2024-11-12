@@ -4,6 +4,7 @@
 #include "userver/storages/postgres/io/chrono.hpp"
 #include "userver/utils/strong_typedef.hpp"
 #include <boost/functional/hash.hpp>
+#include <cassert>
 #include <chrono>
 #include <iterator>
 #include <string>
@@ -26,6 +27,8 @@ struct Key {
 };
 
 enum class Mode { kDynamicConfig, kKillSwitchEnabled, kKillSwitchDisabled };
+
+std::string ToString(Mode mode);
 
 struct Config {
   Key key;
@@ -52,13 +55,16 @@ USERVER_NAMESPACE_BEGIN
 template <>
 struct storages::postgres::io::CppToUserPg<uservice_dynconf::models::Mode> {
   static constexpr DBTypeName postgres_name = "uservice_dynconf.mode";
-  static constexpr USERVER_NAMESPACE::utils::TrivialBiMap enumerators =
+  static constexpr userver::utils::TrivialBiMap enumerators =
       [](auto selector) {
         using Mode = uservice_dynconf::models::Mode;
         return selector()
-            .Case("dynamic_config", Mode::kDynamicConfig)
-            .Case("kill_switch_enabled", Mode::kKillSwitchEnabled)
-            .Case("kill_switch_disabled", Mode::kKillSwitchDisabled);
+            .Case(uservice_dynconf::models::ToString(Mode::kDynamicConfig),
+                  Mode::kDynamicConfig)
+            .Case(uservice_dynconf::models::ToString(Mode::kKillSwitchEnabled),
+                  Mode::kKillSwitchEnabled)
+            .Case(uservice_dynconf::models::ToString(Mode::kKillSwitchDisabled),
+                  Mode::kKillSwitchDisabled);
       };
 };
 
