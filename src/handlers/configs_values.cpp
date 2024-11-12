@@ -58,16 +58,30 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
           ? data->FindConfigsByService(request_data.service)
           : data->FindConfigs(request_data.service, request_data.ids);
 
+  userver::formats::json::ValueBuilder kill_switches_enabled;
+  userver::formats::json::ValueBuilder kill_switches_disabled;
   for (const auto &config : configs) {
     if (config && request_data.update_since.value_or(kMinTime) <=
                       config->updated_at.GetUnderlying()) {
       result[config->key.config_name] = config->config_value;
+      switch (config->mode) {
+      case uservice_dynconf::models::Mode::kKillSwitchEnabled:
+        kill_switches_enabled.PushBack(config->key.config_name);
+        break;
+      case uservice_dynconf::models::Mode::kKillSwitchDisabled:
+        kill_switches_disabled.PushBack(config->key.config_name);
+        break;
+      case uservice_dynconf::models::Mode::kDynamicConfig:
+        break;
+      }
       updated_at = std::max(updated_at, config->updated_at.GetUnderlying());
     }
   }
 
   userver::formats::json::ValueBuilder builder;
   builder["configs"] = result.ExtractValue();
+  builder["kill_switches_enabled"] = kill_switches_enabled;
+  builder["kill_switches_disabled"] = kill_switches_disabled;
   builder["updated_at"] =
       updated_at == kMinTime ? userver::utils::datetime::Now() : updated_at;
   return builder.ExtractValue();
