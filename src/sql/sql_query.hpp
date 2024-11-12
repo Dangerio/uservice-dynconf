@@ -3,7 +3,7 @@
 namespace uservice_dynconf::sql {
 
 inline constexpr std::string_view kSelectSettingsForCache = R"~(
-SELECT (service, config_name), config_value, updated_at
+SELECT (service, config_name), config_value, config_mode, updated_at
 FROM uservice_dynconf.configs
 )~";
 
