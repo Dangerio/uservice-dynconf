@@ -105,7 +105,8 @@ paths:
                                     type: array
                                     description: | 
                                         Enabled Kill Switches,
-                                        must consist of ids from configs
+                                        must consist of ids from configs,
+                                        must not overlap with kill_switches_disabled
                                     items:
                                         type: string
                                         description: Config id
@@ -113,7 +114,8 @@ paths:
                                     type: array
                                     description: | 
                                         Disabled Kill Switches,
-                                        must consist of ids from configs
+                                        must consist of ids from configs,
+                                        must not overlap with kill_switches_enabled
                                     items:
                                         type: string
                                         description: Config id
