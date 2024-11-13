@@ -4,11 +4,13 @@ from testsuite.databases import pgsql
 
 
 @pytest.mark.parametrize(
-    'ids, configs',
+    'ids, configs, kill_switches_enabled, kill_switches_disabled',
     [
         pytest.param(
             ['CUSTOM_CONFIG'],
             {'CUSTOM_CONFIG': {'config': 'value'}},
+            [],
+            [],
             id='add one config',
         ),
         pytest.param(
@@ -22,32 +24,71 @@ from testsuite.databases import pgsql
                     'data': 'nor,',
                 },
             },
+            [],
+            [],
             id='add bulk configs',
+        ),
+        pytest.param(
+            ['ENABLED_KILL_SWITCH'],
+            {'ENABLED_KILL_SWITCH': {'config': 'value'}},
+            ['ENABLED_KILL_SWITCH'],
+            [],
+            id='add one enabled kill switch',
+        ),
+        pytest.param(
+            ['DISABLED_KILL_SWITCH'],
+            {'DISABLED_KILL_SWITCH': {'config': 'value'}},
+            [],
+            ['DISABLED_KILL_SWITCH'],
+            id='add one disabled kill switch',
+        ),
+        pytest.param(
+            ['DYNAMIC_CONFIG', 'ENABLED_KILL_SWITCH', 'DISABLED_KILL_SWITCH'],
+            {
+                'DYNAMIC_CONFIG': 1,
+                'ENABLED_KILL_SWITCH': 2,
+                'DISABLED_KILL_SWITCH': 3,
+            },
+            ['ENABLED_KILL_SWITCH'],
+            ['DISABLED_KILL_SWITCH'],
+            id='add bulk configs with different modes',
         ),
     ],
 )
 async def test_configs_add_values(
         service_client, ids, configs,
+        kill_switches_enabled, kill_switches_disabled,
 ):
     service = 'my-service'
     response = await service_client.post(
         '/configs/values', json={'ids': ids, 'service': service},
     )
     assert response.status_code == 200
-    assert response.json()['configs'] == {}
+    json = response.json()
+    assert json['configs'] == {}
+    assert 'kill_switches_enabled' not in json
+    assert 'kill_switches_disabled' not in json
 
     response = await service_client.post(
-        '/admin/v1/configs', json={'service': service, 'configs': configs},
+        '/admin/v1/configs', json={
+            'service': service,
+            'configs': configs,
+            'kill_switches_enabled': kill_switches_enabled,
+            'kill_switches_disabled': kill_switches_disabled,
+        },
     )
 
-    response.status_code == 204
+    assert response.status_code == 204
 
     await service_client.invalidate_caches()
     response = await service_client.post(
         '/configs/values', json={'ids': ids, 'service': service},
     )
     assert response.status_code == 200
-    assert response.json()['configs'] == configs
+    json = response.json()
+    assert json['configs'] == configs
+    assert json.get('kill_switches_enabled', []) == kill_switches_enabled
+    assert json.get('kill_switches_disabled', []) == kill_switches_disabled
 
 
 @pytest.mark.pgsql(
@@ -123,7 +164,7 @@ async def test_overlapping_kill_switches(
     response = await service_client.post(
         '/admin/v1/configs', json={
             'configs': {
-                config_id: 'value'
+                config_id: {'config': 'value'}
                 for config_id in kill_switches_enabled + kill_switches_disabled
             },
             'service': 'my-service',
@@ -153,7 +194,7 @@ async def test_kill_switches_not_from_configs(
 ):
     response = await service_client.post(
         '/admin/v1/configs', json={
-            'configs': {'DYNAMIC_CONFIG': 'value'},
+            'configs': {'DYNAMIC_CONFIG': {'config': 'value'}},
             'service': 'my-service',
             'kill_switches_enabled': kill_switches_enabled,
             'kill_switches_disabled': kill_switches_disabled,
