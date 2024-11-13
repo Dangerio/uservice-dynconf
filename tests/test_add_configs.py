@@ -125,6 +125,63 @@ async def test_redefinitions_configs(
 
 
 @pytest.mark.parametrize(
+    'kill_switches_enabled, kill_switches_disabled',
+    [
+        pytest.param(
+            ['SAMPLE_DYNAMIC_CONFIG'],
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            id='change config mode so that: '
+               'dynconf -> ks_en, ks_en -> ks_dis, ks_dis -> dynconf',
+        ),
+        pytest.param(
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
+            ['SAMPLE_DYNAMIC_CONFIG'],
+            id='change config mode so that: '
+               'dynconf -> ks_dis, ks_en -> dynconf, ks_dis -> ks_en',
+        ),
+    ],
+)
+@pytest.mark.pgsql(
+    'uservice_dynconf',
+    files=['kill_switches.sql'],
+)
+async def test_redefinitions_of_config_modes(
+        service_client, kill_switches_enabled, kill_switches_disabled,
+):
+    configs = {
+        'SAMPLE_DYNAMIC_CONFIG': 0,
+        'SAMPLE_ENABLED_KILL_SWITCH': 1,
+        'SAMPLE_DISABLED_KILL_SWITCH': 2,
+    }
+    service = 'my-custom-service'
+    response = await service_client.post(
+        '/admin/v1/configs', json={
+            'service': service,
+            'configs': configs,
+            'kill_switches_enabled': kill_switches_enabled,
+            'kill_switches_disabled': kill_switches_disabled,
+        },
+    )
+
+    assert response.status_code == 204
+
+    await service_client.invalidate_caches()
+    ids = [
+        'SAMPLE_DYNAMIC_CONFIG',
+        'SAMPLE_ENABLED_KILL_SWITCH',
+        'SAMPLE_DISABLED_KILL_SWITCH',
+    ]
+    response = await service_client.post(
+        '/configs/values', json={'ids': ids, 'service': service},
+    )
+    assert response.status_code == 200
+    json = response.json()
+    assert json['configs'] == configs
+    assert json['kill_switches_enabled'] == kill_switches_enabled
+    assert json['kill_switches_disabled'] == kill_switches_disabled
+
+
+@pytest.mark.parametrize(
     'request_data',
     [
         ({}),
