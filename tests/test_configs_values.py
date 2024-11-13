@@ -169,9 +169,9 @@ async def test_configs_modes(service_client):
 
     json = response.json()
     assert json['configs'] == {
-        dynamic_config_id: 'dynconf_value',
-        enabled_kill_switch_id: 'ks_enabled_value',
-        disabled_kill_switch_id: 'ks_disabled_value'
+        dynamic_config_id: 0,
+        enabled_kill_switch_id: 1,
+        disabled_kill_switch_id: 2
     }
     assert json[
         'kill_switches_enabled'] == [enabled_kill_switch_id]
