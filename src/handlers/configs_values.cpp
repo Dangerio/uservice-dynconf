@@ -80,8 +80,12 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
 
   userver::formats::json::ValueBuilder builder;
   builder["configs"] = result.ExtractValue();
-  builder["kill_switches_enabled"] = kill_switches_enabled.ExtractValue();
-  builder["kill_switches_disabled"] = kill_switches_disabled.ExtractValue();
+  if (!kill_switches_enabled.IsEmpty()) {
+    builder["kill_switches_enabled"] = kill_switches_enabled.ExtractValue();
+  }
+  if (!kill_switches_disabled.IsEmpty()) {
+    builder["kill_switches_disabled"] = kill_switches_disabled.ExtractValue();
+  }
   builder["updated_at"] =
       updated_at == kMinTime ? userver::utils::datetime::Now() : updated_at;
   return builder.ExtractValue();
