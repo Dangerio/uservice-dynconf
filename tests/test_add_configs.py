@@ -73,7 +73,7 @@ async def test_redefinitions_configs(
         '/admin/v1/configs', json={'service': service, 'configs': configs},
     )
 
-    response.status_code == 204
+    assert response.status_code == 204
 
     await service_client.invalidate_caches()
     response = await service_client.post(
