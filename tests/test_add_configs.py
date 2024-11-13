@@ -144,19 +144,14 @@ async def test_redefinitions_configs(
     files=['kill_switches.sql'],
 )
 async def test_redefinitions_of_config_modes(
-        service_client, check_configs_state,
+        service_client, check_configs_state, kill_switches_configs,
         kill_switches_enabled, kill_switches_disabled,
 ):
-    configs = {
-        'SAMPLE_DYNAMIC_CONFIG': 0,
-        'SAMPLE_ENABLED_KILL_SWITCH': 1,
-        'SAMPLE_DISABLED_KILL_SWITCH': 2,
-    }
     service = 'my-custom-service'
     response = await service_client.post(
         '/admin/v1/configs', json={
             'service': service,
-            'configs': configs,
+            'configs': kill_switches_configs,
             'kill_switches_enabled': kill_switches_enabled,
             'kill_switches_disabled': kill_switches_disabled,
         },
@@ -166,13 +161,9 @@ async def test_redefinitions_of_config_modes(
 
     await service_client.invalidate_caches()
     await check_configs_state(
-        ids=[
-            'SAMPLE_DYNAMIC_CONFIG',
-            'SAMPLE_ENABLED_KILL_SWITCH',
-            'SAMPLE_DISABLED_KILL_SWITCH',
-        ],
+        ids=list(kill_switches_configs.keys()),
         service=service,
-        expected_configs=configs,
+        expected_configs=kill_switches_configs,
         expected_kill_switches_enabled=kill_switches_enabled,
         expected_kill_switches_disabled=kill_switches_disabled
     )

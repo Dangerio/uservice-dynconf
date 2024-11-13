@@ -146,22 +146,11 @@ async def test_configs_values(
     'uservice_dynconf',
     files=['kill_switches.sql'],
 )
-async def test_configs_modes(check_configs_state):
-    dynamic_config_id = 'SAMPLE_DYNAMIC_CONFIG'
-    enabled_kill_switch_id = 'SAMPLE_ENABLED_KILL_SWITCH'
-    disabled_kill_switch_id = 'SAMPLE_DISABLED_KILL_SWITCH'
+async def test_configs_modes(check_configs_state, kill_switches_configs):
     await check_configs_state(
-        ids=[
-            dynamic_config_id,
-            enabled_kill_switch_id,
-            disabled_kill_switch_id
-        ],
+        ids=list(kill_switches_configs.keys()),
         service='my-custom-service',
-        expected_configs={
-            dynamic_config_id: 0,
-            enabled_kill_switch_id: 1,
-            disabled_kill_switch_id: 2
-        },
-        expected_kill_switches_enabled=[enabled_kill_switch_id],
-        expected_kill_switches_disabled=[disabled_kill_switch_id]
+        expected_configs=kill_switches_configs,
+        expected_kill_switches_enabled=['SAMPLE_ENABLED_KILL_SWITCH'],
+        expected_kill_switches_disabled=['SAMPLE_DISABLED_KILL_SWITCH']
     )
