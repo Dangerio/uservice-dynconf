@@ -139,4 +139,41 @@ async def test_configs_values(
         '/configs/values', json={'ids': ids, 'service': service},
     )
     assert response.status_code == 200
-    assert response.json()['configs'] == expected
+    json = response.json()
+    assert json['configs'] == expected
+    assert 'kill_switches_enabled' not in json
+    assert 'kill_switches_disabled' not in json
+
+
+@pytest.mark.pgsql(
+    'uservice_dynconf',
+    files=['kill_switches.sql'],
+)
+async def test_configs_modes(service_client):
+    dynamic_config_id = 'SAMPLE_DYNAMIC_CONFIG'
+    enabled_kill_switch_id = 'SAMPLE_ENABLED_KILL_SWITCH'
+    disabled_kill_switch_id = 'SAMPLE_DISABLED_KILL_SWITCH'
+    response = await service_client.post(
+        '/configs/values',
+        json={
+            'ids': [
+                dynamic_config_id,
+                enabled_kill_switch_id,
+                disabled_kill_switch_id
+            ],
+            'service': 'my-custom-service'
+        },
+    )
+
+    assert response.status_code == 200
+
+    json = response.json()
+    assert json['configs'] == {
+        dynamic_config_id: 'dynconf_value',
+        enabled_kill_switch_id: 'ks_enabled_value',
+        disabled_kill_switch_id: 'ks_disabled_value'
+    }
+    assert json[
+        'kill_switches_enabled'] == [enabled_kill_switch_id]
+    assert json[
+        'kill_switches_disabled'] == [disabled_kill_switch_id]
