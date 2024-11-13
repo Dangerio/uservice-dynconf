@@ -1,4 +1,6 @@
 #include "config.hpp"
+#include <cassert>
+#include <string>
 
 namespace uservice_dynconf::models {
 
