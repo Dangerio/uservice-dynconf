@@ -56,18 +56,17 @@ from testsuite.databases import pgsql
     ],
 )
 async def test_configs_add_values(
-        service_client, ids, configs,
-        kill_switches_enabled, kill_switches_disabled,
+        service_client, check_configs_state,
+        ids, configs, kill_switches_enabled, kill_switches_disabled,
 ):
     service = 'my-service'
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs={},
+        expected_kill_switches_enabled=[],
+        expected_kill_switches_disabled=[]
     )
-    assert response.status_code == 200
-    json = response.json()
-    assert json['configs'] == {}
-    assert 'kill_switches_enabled' not in json
-    assert 'kill_switches_disabled' not in json
 
     response = await service_client.post(
         '/admin/v1/configs', json={
@@ -81,14 +80,13 @@ async def test_configs_add_values(
     assert response.status_code == 204
 
     await service_client.invalidate_caches()
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs=configs,
+        expected_kill_switches_enabled=kill_switches_enabled,
+        expected_kill_switches_disabled=kill_switches_disabled
     )
-    assert response.status_code == 200
-    json = response.json()
-    assert json['configs'] == configs
-    assert json.get('kill_switches_enabled', []) == kill_switches_enabled
-    assert json.get('kill_switches_disabled', []) == kill_switches_disabled
 
 
 @pytest.mark.pgsql(
@@ -146,7 +144,8 @@ async def test_redefinitions_configs(
     files=['kill_switches.sql'],
 )
 async def test_redefinitions_of_config_modes(
-        service_client, kill_switches_enabled, kill_switches_disabled,
+        service_client, check_configs_state,
+        kill_switches_enabled, kill_switches_disabled,
 ):
     configs = {
         'SAMPLE_DYNAMIC_CONFIG': 0,
@@ -166,19 +165,17 @@ async def test_redefinitions_of_config_modes(
     assert response.status_code == 204
 
     await service_client.invalidate_caches()
-    ids = [
-        'SAMPLE_DYNAMIC_CONFIG',
-        'SAMPLE_ENABLED_KILL_SWITCH',
-        'SAMPLE_DISABLED_KILL_SWITCH',
-    ]
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await check_configs_state(
+        ids=[
+            'SAMPLE_DYNAMIC_CONFIG',
+            'SAMPLE_ENABLED_KILL_SWITCH',
+            'SAMPLE_DISABLED_KILL_SWITCH',
+        ],
+        service=service,
+        expected_configs=configs,
+        expected_kill_switches_enabled=kill_switches_enabled,
+        expected_kill_switches_disabled=kill_switches_disabled
     )
-    assert response.status_code == 200
-    json = response.json()
-    assert json['configs'] == configs
-    assert json['kill_switches_enabled'] == kill_switches_enabled
-    assert json['kill_switches_disabled'] == kill_switches_disabled
 
 
 @pytest.mark.parametrize(

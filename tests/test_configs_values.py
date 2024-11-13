@@ -133,47 +133,35 @@ SETUP_DB_MARK = [
     ],
 )
 async def test_configs_values(
-        service_client, mocked_time, ids, service, expected
+        check_configs_state,
+        ids, service, expected
 ):
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await check_configs_state(
+        ids=ids, service=service, expected_configs=expected,
+        expected_kill_switches_enabled=[], expected_kill_switches_disabled=[]
     )
-    assert response.status_code == 200
-    json = response.json()
-    assert json['configs'] == expected
-    assert 'kill_switches_enabled' not in json
-    assert 'kill_switches_disabled' not in json
 
 
 @pytest.mark.pgsql(
     'uservice_dynconf',
     files=['kill_switches.sql'],
 )
-async def test_configs_modes(service_client):
+async def test_configs_modes(check_configs_state):
     dynamic_config_id = 'SAMPLE_DYNAMIC_CONFIG'
     enabled_kill_switch_id = 'SAMPLE_ENABLED_KILL_SWITCH'
     disabled_kill_switch_id = 'SAMPLE_DISABLED_KILL_SWITCH'
-    response = await service_client.post(
-        '/configs/values',
-        json={
-            'ids': [
-                dynamic_config_id,
-                enabled_kill_switch_id,
-                disabled_kill_switch_id
-            ],
-            'service': 'my-custom-service'
+    await check_configs_state(
+        ids=[
+            dynamic_config_id,
+            enabled_kill_switch_id,
+            disabled_kill_switch_id
+        ],
+        service='my-custom-service',
+        expected_configs={
+            dynamic_config_id: 0,
+            enabled_kill_switch_id: 1,
+            disabled_kill_switch_id: 2
         },
+        expected_kill_switches_enabled=[enabled_kill_switch_id],
+        expected_kill_switches_disabled=[disabled_kill_switch_id]
     )
-
-    assert response.status_code == 200
-
-    json = response.json()
-    assert json['configs'] == {
-        dynamic_config_id: 0,
-        enabled_kill_switch_id: 1,
-        disabled_kill_switch_id: 2
-    }
-    assert json[
-        'kill_switches_enabled'] == [enabled_kill_switch_id]
-    assert json[
-        'kill_switches_disabled'] == [disabled_kill_switch_id]
