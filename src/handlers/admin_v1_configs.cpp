@@ -64,18 +64,13 @@ userver::formats::json::Value MakeConfigModeMap(
 
   userver::formats::json::ValueBuilder builder;
   for (const auto &[config_name, config_value] : Items(configs)) {
+    Mode config_mode = Mode::kDynamicConfig;
     if (kill_switches_enabled.count(config_name) > 0) {
-      builder[config_name] =
-          uservice_dynconf::models::ToString(Mode::kKillSwitchEnabled);
+      config_mode = Mode::kKillSwitchEnabled;
     } else if (kill_switches_disabled.count(config_name) > 0) {
-      builder[config_name] =
-          uservice_dynconf::models::ToString(Mode::kKillSwitchDisabled);
-      ;
-    } else {
-      builder[config_name] =
-          uservice_dynconf::models::ToString(Mode::kDynamicConfig);
-      ;
+      config_mode = Mode::kKillSwitchDisabled;
     }
+    builder[config_name] = uservice_dynconf::models::ToString(config_mode);
   }
 
   return builder.ExtractValue();
