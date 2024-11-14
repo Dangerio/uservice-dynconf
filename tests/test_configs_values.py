@@ -149,7 +149,7 @@ async def test_configs_values(
 async def test_configs_modes(check_configs_state, kill_switches_configs):
     await check_configs_state(
         ids=list(kill_switches_configs.keys()),
-        service='my-custom-service',
+        service='service-with-kill-switches',
         expected_configs=kill_switches_configs,
         expected_kill_switches_enabled=['SAMPLE_ENABLED_KILL_SWITCH'],
         expected_kill_switches_disabled=['SAMPLE_DISABLED_KILL_SWITCH']

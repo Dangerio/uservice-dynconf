@@ -127,7 +127,7 @@ async def test_remove_kill_switches(
     service_client, check_configs_state,
     ids, configs, kill_switches_enabled, kill_switches_disabled,
 ):
-    service = 'my-custom-service'
+    service = 'service-with-kill-switches'
     await check_configs_state(
         ids=ids,
         service=service,

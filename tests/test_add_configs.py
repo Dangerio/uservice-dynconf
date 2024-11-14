@@ -151,7 +151,7 @@ async def test_redefinitions_of_config_modes(
         service_client, check_configs_state, kill_switches_configs,
         kill_switches_enabled, kill_switches_disabled,
 ):
-    service = 'my-custom-service'
+    service = 'service-with-kill-switches'
     response = await service_client.post(
         '/admin/v1/configs', json={
             'service': service,
