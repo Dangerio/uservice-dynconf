@@ -30,14 +30,14 @@ from testsuite.databases import pgsql
         ),
         pytest.param(
             ['ENABLED_KILL_SWITCH'],
-            {'ENABLED_KILL_SWITCH': {'config': 'value'}},
+            {'ENABLED_KILL_SWITCH': 1},
             ['ENABLED_KILL_SWITCH'],
             [],
             id='add one enabled kill switch',
         ),
         pytest.param(
             ['DISABLED_KILL_SWITCH'],
-            {'DISABLED_KILL_SWITCH': {'config': 'value'}},
+            {'DISABLED_KILL_SWITCH': 2},
             [],
             ['DISABLED_KILL_SWITCH'],
             id='add one disabled kill switch',
@@ -45,9 +45,9 @@ from testsuite.databases import pgsql
         pytest.param(
             ['DYNAMIC_CONFIG', 'ENABLED_KILL_SWITCH', 'DISABLED_KILL_SWITCH'],
             {
-                'DYNAMIC_CONFIG': 1,
-                'ENABLED_KILL_SWITCH': 2,
-                'DISABLED_KILL_SWITCH': 3,
+                'DYNAMIC_CONFIG': 0,
+                'ENABLED_KILL_SWITCH': 1,
+                'DISABLED_KILL_SWITCH': 2,
             },
             ['ENABLED_KILL_SWITCH'],
             ['DISABLED_KILL_SWITCH'],
@@ -213,7 +213,7 @@ async def test_overlapping_kill_switches(
     response = await service_client.post(
         '/admin/v1/configs', json={
             'configs': {
-                config_id: {'config': 'value'}
+                config_id: 0
                 for config_id in kill_switches_enabled + kill_switches_disabled
             },
             'service': 'my-service',
@@ -243,7 +243,7 @@ async def test_kill_switches_not_from_configs(
 ):
     response = await service_client.post(
         '/admin/v1/configs', json={
-            'configs': {'DYNAMIC_CONFIG': {'config': 'value'}},
+            'configs': {'DYNAMIC_CONFIG': 0},
             'service': 'my-service',
             'kill_switches_enabled': kill_switches_enabled,
             'kill_switches_disabled': kill_switches_disabled,
