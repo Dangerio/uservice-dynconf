@@ -94,15 +94,17 @@ async def test_configs_add_values(
     files=['default_configs.sql', 'custom_configs.sql'],
 )
 async def test_redefinitions_configs(
-        service_client,
+        service_client, check_configs_state,
 ):
     ids = ['CUSTOM_CONFIG', 'MORE_CONFIGS']
     service = 'my-custom-service'
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs={'CUSTOM_CONFIG': {'config': False}},
+        expected_kill_switches_enabled=[],
+        expected_kill_switches_disabled=[]
     )
-    assert response.status_code == 200
-    assert response.json()['configs'] == {'CUSTOM_CONFIG': {'config': False}}
 
     configs = {
         'CUSTOM_CONFIG': {'config': True, 'data': {}, 'status': 99},
@@ -115,11 +117,13 @@ async def test_redefinitions_configs(
     assert response.status_code == 204
 
     await service_client.invalidate_caches()
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs=configs,
+        expected_kill_switches_enabled=[],
+        expected_kill_switches_disabled=[]
     )
-    assert response.status_code == 200
-    assert response.json()['configs'] == configs
 
 
 @pytest.mark.parametrize(

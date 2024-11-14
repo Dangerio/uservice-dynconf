@@ -59,17 +59,20 @@ from testsuite.databases import pgsql
 )
 async def test_configs_delete_values(
         service_client,
+        check_configs_state,
         mocked_time,
         ids,
         service,
         configs,
         expected,
 ):
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs=configs,
+        expected_kill_switches_enabled=[],
+        expected_kill_switches_disabled=[]
     )
-    assert response.status_code == 200
-    assert response.json()['configs'] == configs
 
     response = await service_client.post(
         '/admin/v1/configs/delete', json={'service': service, 'ids': ids},
@@ -78,11 +81,13 @@ async def test_configs_delete_values(
     response.status_code == 204
 
     await service_client.invalidate_caches()
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs=expected,
+        expected_kill_switches_enabled=[],
+        expected_kill_switches_disabled=[]
     )
-    assert response.status_code == 200
-    assert response.json()['configs'] == expected
 
 
 @pytest.mark.parametrize(
