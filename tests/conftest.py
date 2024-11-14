@@ -36,6 +36,10 @@ def pgsql_local(service_source_dir, pgsql_local_create):
 
 @pytest.fixture
 async def check_configs_state(service_client):
+    """
+    Check that configs state (values and modes) is equal to expected 
+    by sending request to /configs/values
+    """
     async def check(
             ids: list[str], service: str, expected_configs: dict,
             expected_kill_switches_enabled: list[str],
@@ -57,6 +61,7 @@ async def check_configs_state(service_client):
 
 @pytest.fixture
 def kill_switches_configs():
+    """Configs from kill_switches.sql"""
     return {
         'SAMPLE_DYNAMIC_CONFIG': 0,
         'SAMPLE_ENABLED_KILL_SWITCH': 1,
