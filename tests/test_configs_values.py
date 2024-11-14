@@ -142,15 +142,58 @@ async def test_configs_values(
     )
 
 
+@pytest.mark.parametrize(
+    'ids, configs, kill_switches_enabled, kill_switches_disabled',
+    [
+        pytest.param(
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            {'SAMPLE_ENABLED_KILL_SWITCH': 1},
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            [],
+            id='get enabled kill switch',
+        ),
+        pytest.param(
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
+            {'SAMPLE_DISABLED_KILL_SWITCH': 2},
+            [],
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
+            id='get disabled kill switch',
+        ),
+        pytest.param(
+            ['SAMPLE_ENABLED_KILL_SWITCH', 'SAMPLE_DISABLED_KILL_SWITCH'],
+            {
+                'SAMPLE_ENABLED_KILL_SWITCH': 1,
+                'SAMPLE_DISABLED_KILL_SWITCH': 2,
+            },
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
+            id='get enabled and disabled kill switches',
+        ),
+        pytest.param(
+            [],
+            {
+                'SAMPLE_DYNAMIC_CONFIG': 0,
+                'SAMPLE_ENABLED_KILL_SWITCH': 1,
+                'SAMPLE_DISABLED_KILL_SWITCH': 2,
+            },
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
+            id='get kill switches by service',
+        ),
+    ],
+)
 @pytest.mark.pgsql(
     'uservice_dynconf',
     files=['kill_switches.sql'],
 )
-async def test_configs_modes(check_configs_state, kill_switches_configs):
+async def test_configs_modes(
+    check_configs_state,
+    ids, configs, kill_switches_enabled, kill_switches_disabled,
+):
     await check_configs_state(
-        ids=list(kill_switches_configs.keys()),
+        ids=ids,
         service='service-with-kill-switches',
-        expected_configs=kill_switches_configs,
-        expected_kill_switches_enabled=['SAMPLE_ENABLED_KILL_SWITCH'],
-        expected_kill_switches_disabled=['SAMPLE_DISABLED_KILL_SWITCH']
+        expected_configs=configs,
+        expected_kill_switches_enabled=kill_switches_enabled,
+        expected_kill_switches_disabled=kill_switches_disabled
     )
