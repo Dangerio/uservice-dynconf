@@ -2,7 +2,11 @@ DROP SCHEMA IF EXISTS uservice_dynconf CASCADE;
 
 CREATE SCHEMA IF NOT EXISTS uservice_dynconf;
 
-CREATE TYPE uservice_dynconf.mode AS ENUM ('dynamic_config', 'kill_switch_enabled', 'kill_switch_disabled');
+CREATE TYPE uservice_dynconf.mode AS ENUM (
+    'dynamic_config',
+    'kill_switch_enabled',
+    'kill_switch_disabled'
+);
 CREATE TABLE IF NOT EXISTS uservice_dynconf.configs (
     service TEXT NOT NULL DEFAULT '__default__',
     config_name TEXT NOT NULL,
