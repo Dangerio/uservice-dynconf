@@ -80,7 +80,7 @@ async def test_configs_delete_values(
 
     response.status_code == 204
 
-    await service_client.invalidate_caches()
+    await service_client.invalidate_caches(cache_names=['configs-cache'])
     await check_configs_state(
         ids=ids,
         service=service,

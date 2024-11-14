@@ -79,7 +79,7 @@ async def test_configs_add_values(
 
     assert response.status_code == 204
 
-    await service_client.invalidate_caches()
+    await service_client.invalidate_caches(cache_names=['configs-cache'])
     await check_configs_state(
         ids=ids,
         service=service,
@@ -116,7 +116,7 @@ async def test_redefinitions_configs(
 
     assert response.status_code == 204
 
-    await service_client.invalidate_caches()
+    await service_client.invalidate_caches(cache_names=['configs-cache'])
     await check_configs_state(
         ids=ids,
         service=service,
@@ -163,7 +163,7 @@ async def test_redefinitions_of_config_modes(
 
     assert response.status_code == 204
 
-    await service_client.invalidate_caches()
+    await service_client.invalidate_caches(cache_names=['configs-cache'])
     await check_configs_state(
         ids=list(kill_switches_configs.keys()),
         service=service,
