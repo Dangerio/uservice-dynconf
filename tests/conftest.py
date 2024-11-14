@@ -57,13 +57,3 @@ async def check_configs_state(service_client):
                         ) == expected_kill_switches_disabled
 
     return check
-
-
-@pytest.fixture
-def kill_switches_configs():
-    """Configs from kill_switches.sql"""
-    return {
-        'SAMPLE_DYNAMIC_CONFIG': 0,
-        'SAMPLE_ENABLED_KILL_SWITCH': 1,
-        'SAMPLE_DISABLED_KILL_SWITCH': 2,
-    }
