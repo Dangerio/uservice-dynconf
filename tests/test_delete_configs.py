@@ -91,18 +91,30 @@ async def test_configs_delete_values(
 
 
 @pytest.mark.parametrize(
-    'ids',
+    'ids, configs, kill_switches_enabled, kill_switches_disabled',
     [
         pytest.param(
             ['SAMPLE_ENABLED_KILL_SWITCH'],
+            {'SAMPLE_ENABLED_KILL_SWITCH': 1},
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            [],
             id='delete enabled kill switch',
         ),
         pytest.param(
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
+            {'SAMPLE_DISABLED_KILL_SWITCH': 2},
+            [],
             ['SAMPLE_DISABLED_KILL_SWITCH'],
             id='delete disabled kill switch',
         ),
         pytest.param(
             ['SAMPLE_ENABLED_KILL_SWITCH', 'SAMPLE_DISABLED_KILL_SWITCH'],
+            {
+                'SAMPLE_ENABLED_KILL_SWITCH': 1,
+                'SAMPLE_DISABLED_KILL_SWITCH': 2,
+            },
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
             id='delete enabled and disabled kill switches',
         ),
     ],
@@ -112,9 +124,18 @@ async def test_configs_delete_values(
     files=['kill_switches.sql'],
 )
 async def test_remove_kill_switches(
-    service_client, check_configs_state, ids
+    service_client, check_configs_state,
+    ids, configs, kill_switches_enabled, kill_switches_disabled,
 ):
-    service = 'my-service'
+    service = 'my-custom-service'
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs=configs,
+        expected_kill_switches_enabled=kill_switches_enabled,
+        expected_kill_switches_disabled=kill_switches_disabled
+    )
+
     response = await service_client.post(
         '/admin/v1/configs/delete', json={
             'service': service, 'ids': ids
