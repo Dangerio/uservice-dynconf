@@ -138,7 +138,7 @@ async def test_configs_values(
 ):
     await check_configs_state(
         ids=ids, service=service, expected_configs=expected,
-        expected_kill_switches_enabled=[], expected_kill_switches_disabled=[]
+        expected_kill_switches_enabled=[], expected_kill_switches_disabled=[],
     )
 
 

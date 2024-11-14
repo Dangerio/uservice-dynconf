@@ -65,7 +65,7 @@ async def test_configs_add_values(
         service=service,
         expected_configs={},
         expected_kill_switches_enabled=[],
-        expected_kill_switches_disabled=[]
+        expected_kill_switches_disabled=[],
     )
 
     response = await service_client.post(
@@ -85,7 +85,7 @@ async def test_configs_add_values(
         service=service,
         expected_configs=configs,
         expected_kill_switches_enabled=kill_switches_enabled,
-        expected_kill_switches_disabled=kill_switches_disabled
+        expected_kill_switches_disabled=kill_switches_disabled,
     )
 
 
@@ -103,7 +103,7 @@ async def test_redefinitions_configs(
         service=service,
         expected_configs={'CUSTOM_CONFIG': {'config': False}},
         expected_kill_switches_enabled=[],
-        expected_kill_switches_disabled=[]
+        expected_kill_switches_disabled=[],
     )
 
     configs = {
@@ -122,7 +122,7 @@ async def test_redefinitions_configs(
         service=service,
         expected_configs=configs,
         expected_kill_switches_enabled=[],
-        expected_kill_switches_disabled=[]
+        expected_kill_switches_disabled=[],
     )
 
 
@@ -133,13 +133,13 @@ async def test_redefinitions_configs(
             ['SAMPLE_DYNAMIC_CONFIG'],
             ['SAMPLE_ENABLED_KILL_SWITCH'],
             id='change config mode so that: '
-               'dynconf -> ks_en, ks_en -> ks_dis, ks_dis -> dynconf',
+               'dynconf -> ks_en; ks_en -> ks_dis; ks_dis -> dynconf',
         ),
         pytest.param(
             ['SAMPLE_DISABLED_KILL_SWITCH'],
             ['SAMPLE_DYNAMIC_CONFIG'],
             id='change config mode so that: '
-               'dynconf -> ks_dis, ks_en -> dynconf, ks_dis -> ks_en',
+               'dynconf -> ks_dis; ks_en -> dynconf; ks_dis -> ks_en',
         ),
     ],
 )
@@ -174,7 +174,7 @@ async def test_redefinitions_of_config_modes(
         service=service,
         expected_configs=configs,
         expected_kill_switches_enabled=kill_switches_enabled,
-        expected_kill_switches_disabled=kill_switches_disabled
+        expected_kill_switches_disabled=kill_switches_disabled,
     )
 
 
@@ -190,7 +190,7 @@ async def test_redefinitions_of_config_modes(
         ({'configs': {}, 'service': 'my-service'}),
     ],
 )
-async def test_missing_required_fields(
+async def test_add_configs_400(
         service_client, request_data,
 ):
     response = await service_client.post(
@@ -208,7 +208,7 @@ async def test_missing_required_fields(
     [
         (['FIRST_CONFIG'], ['FIRST_CONFIG']),
         (['FIRST_CONFIG'], ['FIRST_CONFIG', 'SECOND_CONFIG']),
-        (['FIRST_CONFIG', 'SECOND_CONFIG'], ['FIRST_CONFIG'],),
+        (['FIRST_CONFIG', 'SECOND_CONFIG'], ['FIRST_CONFIG']),
         (['FIRST_CONFIG', 'SECOND_CONFIG'], ['SECOND_CONFIG', 'THIRD_CONFIG']),
     ],
 )
