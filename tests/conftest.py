@@ -37,7 +37,7 @@ def pgsql_local(service_source_dir, pgsql_local_create):
 @pytest.fixture
 async def check_configs_state(service_client):
     """
-    Check that configs state (values and modes) is equal to expected 
+    Check that configs state (values and modes) is equal to expected
     by sending request to /configs/values
     """
     async def check(
