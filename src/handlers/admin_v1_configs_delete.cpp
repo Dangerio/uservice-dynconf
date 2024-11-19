@@ -19,7 +19,7 @@ struct RequestData {
 };
 
 RequestData ParseRequest(const userver::formats::json::Value &request) {
-  auto body = request.As<AdminConfigsDeleteRequestBody>();
+  auto &&body = request.As<AdminConfigsDeleteRequestBody>();
 
   RequestData result;
   result.ids = body.ids.value_or(std::vector<std::string>({}));

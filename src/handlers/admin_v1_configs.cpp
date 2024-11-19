@@ -25,22 +25,20 @@ struct RequestData {
 };
 
 RequestData ParseRequest(const userver::formats::json::Value &request) {
-  auto body = request.As<AdminConfigsRequestBody>();
+  auto &&body = request.As<AdminConfigsRequestBody>();
 
   RequestData result;
   if (body.configs.has_value()) {
-    result.configs = std::move(body.configs.value().extra);
+    result.configs = body.configs.value().extra;
   }
   if (body.kill_switches_disabled.has_value()) {
-    result.kill_switches_disabled =
-        std::move(body.kill_switches_disabled.value());
+    result.kill_switches_disabled = body.kill_switches_disabled.value();
   }
   if (body.kill_switches_enabled.has_value()) {
-    result.kill_switches_enabled =
-        std::move(body.kill_switches_enabled.value());
+    result.kill_switches_enabled = body.kill_switches_enabled.value();
   }
   if (body.service.has_value()) {
-    result.service = std::move(body.service.value());
+    result.service = body.service.value();
   }
 
   return result;
