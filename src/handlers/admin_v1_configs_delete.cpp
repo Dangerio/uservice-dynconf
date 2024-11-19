@@ -1,4 +1,5 @@
 #include "admin_v1_configs_delete.hpp"
+#include "docs/api/api.hpp"
 #include "userver/formats/json/value.hpp"
 #include "userver/server/http/http_status.hpp"
 #include "userver/storages/postgres/cluster.hpp"
@@ -6,6 +7,7 @@
 
 #include "sql/sql_query.hpp"
 #include "utils/make_error.hpp"
+#include <string>
 
 namespace uservice_dynconf::handlers::admin_v1_configs_delete::post {
 
@@ -17,9 +19,11 @@ struct RequestData {
 };
 
 RequestData ParseRequest(const userver::formats::json::Value &request) {
+  auto body = request.As<AdminConfigsDeleteRequestBody>();
+
   RequestData result;
-  result.ids = request["ids"].As<std::vector<std::string>>({});
-  result.service = request["service"].As<std::string>({});
+  result.ids = body.ids.value_or(std::vector<std::string>({}));
+  result.service = body.service.value_or(std::string({}));
   return result;
 }
 
