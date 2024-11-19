@@ -59,17 +59,20 @@ from testsuite.databases import pgsql
 )
 async def test_configs_delete_values(
         service_client,
+        check_configs_state,
         mocked_time,
         ids,
         service,
         configs,
         expected,
 ):
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs=configs,
+        expected_kill_switches_enabled=[],
+        expected_kill_switches_disabled=[]
     )
-    assert response.status_code == 200
-    assert response.json()['configs'] == configs
 
     response = await service_client.post(
         '/admin/v1/configs/delete', json={'service': service, 'ids': ids},
@@ -77,12 +80,78 @@ async def test_configs_delete_values(
 
     response.status_code == 204
 
-    await service_client.invalidate_caches()
-    response = await service_client.post(
-        '/configs/values', json={'ids': ids, 'service': service},
+    await service_client.invalidate_caches(cache_names=['configs-cache'])
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs=expected,
+        expected_kill_switches_enabled=[],
+        expected_kill_switches_disabled=[]
     )
-    assert response.status_code == 200
-    assert response.json()['configs'] == expected
+
+
+@pytest.mark.parametrize(
+    'ids, configs, kill_switches_enabled, kill_switches_disabled',
+    [
+        pytest.param(
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            {'SAMPLE_ENABLED_KILL_SWITCH': 1},
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            [],
+            id='delete enabled kill switch',
+        ),
+        pytest.param(
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
+            {'SAMPLE_DISABLED_KILL_SWITCH': 2},
+            [],
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
+            id='delete disabled kill switch',
+        ),
+        pytest.param(
+            ['SAMPLE_ENABLED_KILL_SWITCH', 'SAMPLE_DISABLED_KILL_SWITCH'],
+            {
+                'SAMPLE_ENABLED_KILL_SWITCH': 1,
+                'SAMPLE_DISABLED_KILL_SWITCH': 2,
+            },
+            ['SAMPLE_ENABLED_KILL_SWITCH'],
+            ['SAMPLE_DISABLED_KILL_SWITCH'],
+            id='delete enabled and disabled kill switches',
+        ),
+    ],
+)
+@pytest.mark.pgsql(
+    'uservice_dynconf',
+    files=['kill_switches.sql'],
+)
+async def test_remove_kill_switches(
+    service_client, check_configs_state,
+    ids, configs, kill_switches_enabled, kill_switches_disabled,
+):
+    service = 'service-with-kill-switches'
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs=configs,
+        expected_kill_switches_enabled=kill_switches_enabled,
+        expected_kill_switches_disabled=kill_switches_disabled
+    )
+
+    response = await service_client.post(
+        '/admin/v1/configs/delete', json={
+            'service': service, 'ids': ids
+        },
+    )
+
+    response.status_code == 204
+
+    await service_client.invalidate_caches(cache_names=['configs-cache'])
+    await check_configs_state(
+        ids=ids,
+        service=service,
+        expected_configs={},
+        expected_kill_switches_enabled=[],
+        expected_kill_switches_disabled=[]
+    )
 
 
 @pytest.mark.parametrize(

@@ -7,6 +7,8 @@
 #include <chrono>
 #include <iterator>
 #include <string>
+#include <userver/storages/postgres/io/enum_types.hpp>
+#include <userver/utils/trivial_map.hpp>
 namespace uservice_dynconf::models {
 
 using ConfigId = userver::utils::StrongTypedef<
@@ -23,9 +25,14 @@ struct Key {
   }
 };
 
+enum class Mode { kDynamicConfig, kKillSwitchEnabled, kKillSwitchDisabled };
+
+std::string ToString(Mode mode);
+
 struct Config {
   Key key;
   userver::formats::json::Value config_value;
+  Mode mode;
   userver::storages::postgres::TimePointTz updated_at;
 };
 } // namespace uservice_dynconf::models
@@ -41,3 +48,23 @@ template <> struct hash<uservice_dynconf::models::Key> {
   }
 };
 } // namespace std
+
+USERVER_NAMESPACE_BEGIN
+
+template <>
+struct storages::postgres::io::CppToUserPg<uservice_dynconf::models::Mode> {
+  static constexpr DBTypeName postgres_name = "uservice_dynconf.mode";
+  static constexpr userver::utils::TrivialBiMap enumerators =
+      [](auto selector) {
+        using Mode = uservice_dynconf::models::Mode;
+        return selector()
+            .Case(uservice_dynconf::models::ToString(Mode::kDynamicConfig),
+                  Mode::kDynamicConfig)
+            .Case(uservice_dynconf::models::ToString(Mode::kKillSwitchEnabled),
+                  Mode::kKillSwitchEnabled)
+            .Case(uservice_dynconf::models::ToString(Mode::kKillSwitchDisabled),
+                  Mode::kKillSwitchDisabled);
+      };
+};
+
+USERVER_NAMESPACE_END
