@@ -54,6 +54,15 @@ userver_target_generate_chaotic(${PROJECT_NAME}-chgen
 )
 target_link_libraries("${PROJECT_NAME}" ${PROJECT_NAME}-chgen)
 
+# Adding SQL-queries codegen
+userver_add_sql_library(
+    ${PROJECT_NAME}-sql
+    NAMESPACE uservice_dynconf
+    OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
+    SQL_FILES src/sql/*.sql
+)
+target_link_libraries("${PROJECT_NAME}" ${PROJECT_NAME}-sql)
+
 # Functional Tests
 userver_testsuite_add_simple()
 

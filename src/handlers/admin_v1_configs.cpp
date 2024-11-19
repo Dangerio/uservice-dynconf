@@ -7,7 +7,7 @@
 #include "userver/storages/postgres/component.hpp"
 
 #include "models/config.hpp"
-#include "sql/sql_query.hpp"
+#include "uservice_dynconf/sql_queries.hpp"
 #include "utils/make_error.hpp"
 #include <string>
 #include <unordered_set>
@@ -128,7 +128,7 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
       request_data.configs, request_data.kill_switches_enabled,
       request_data.kill_switches_disabled);
   cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                    uservice_dynconf::sql::kInsertConfigValue.data(),
+                    uservice_dynconf::sql::kInsertConfigValue,
                     request_data.service, request_data.configs,
                     config_mode_map);
 
