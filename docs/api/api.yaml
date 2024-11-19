@@ -105,6 +105,7 @@ components:
                         description: config id
                 update_since:
                     type: string
+                    format: date-time
                     description: the date from which to watch config updates
                 service:
                     type: string
@@ -135,6 +136,7 @@ components:
                         description: Config id
                 updated_at:
                     type: string
+                    format: date-time
                     description: Time of last update
                 not_found:
                     description: list of configs not found
