@@ -148,8 +148,6 @@ components:
             description: The body of the /admin/v1/configs request
             type: object
             additionalProperties: false
-            required:
-                - configs
             properties:
                 configs:
                     type: object
@@ -159,6 +157,7 @@ components:
                         you can have multiple configs at the same time
                 kill_switches_enabled:
                     type: array
+                    x-usrv-cpp-container: std::unordered_set
                     description: | 
                         Enabled Kill Switches,
                         must consist of ids from configs,
@@ -168,6 +167,7 @@ components:
                         description: Config id
                 kill_switches_disabled:
                     type: array
+                    x-usrv-cpp-container: std::unordered_set
                     description: | 
                         Disabled Kill Switches,
                         must consist of ids from configs,
@@ -178,14 +178,10 @@ components:
                 service:
                     type: string
                     description: The name of the service to create/update for configs for
-                    default: __default__
         AdminConfigsDeleteRequestBody:
             description: The body of the /admin/v1/configs/delete request
             type: object
-            additionalProperties: false     
-            required:
-                - ids
-                - service
+            additionalProperties: false
             properties:
                 ids:
                     type: array
@@ -197,4 +193,3 @@ components:
                 service:
                     type: string
                     description: The name of the service to delete for configs for
-                    default: __default__

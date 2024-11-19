@@ -1,4 +1,5 @@
 #include "admin_v1_configs.hpp"
+#include "docs/api/api.hpp"
 #include "userver/formats/json/inline.hpp"
 #include "userver/formats/json/value.hpp"
 #include "userver/formats/yaml/value_builder.hpp"
@@ -10,6 +11,7 @@
 #include "utils/make_error.hpp"
 #include <string>
 #include <unordered_set>
+#include <userver/logging/log.hpp>
 #include <vector>
 
 namespace uservice_dynconf::handlers::admin_v1_configs::post {
@@ -23,15 +25,24 @@ struct RequestData {
 };
 
 RequestData ParseRequest(const userver::formats::json::Value &request) {
+  auto body = request.As<AdminConfigsRequestBody>();
+
   RequestData result;
-  if (request["configs"].IsObject()) {
-    result.configs = request["configs"];
+  if (body.configs.has_value()) {
+    result.configs = std::move(body.configs.value().extra);
   }
-  result.service = request["service"].As<std::string>({});
-  result.kill_switches_enabled =
-      request["kill_switches_enabled"].As<std::unordered_set<std::string>>({});
-  result.kill_switches_disabled =
-      request["kill_switches_disabled"].As<std::unordered_set<std::string>>({});
+  if (body.kill_switches_disabled.has_value()) {
+    result.kill_switches_disabled =
+        std::move(body.kill_switches_disabled.value());
+  }
+  if (body.kill_switches_enabled.has_value()) {
+    result.kill_switches_enabled =
+        std::move(body.kill_switches_enabled.value());
+  }
+  if (body.service.has_value()) {
+    result.service = std::move(body.service.value());
+  }
+
   return result;
 }
 
