@@ -11,7 +11,6 @@
 #include "utils/make_error.hpp"
 #include <string>
 #include <unordered_set>
-#include <userver/logging/log.hpp>
 #include <vector>
 
 namespace uservice_dynconf::handlers::admin_v1_configs::post {
