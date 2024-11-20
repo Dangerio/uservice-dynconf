@@ -12,8 +12,9 @@ namespace {
 constexpr static const char *kDefaultService = "__default__";
 }
 
-userver::storages::postgres::Query ConfigCachePolicy::kQuery =
-    uservice_dynconf::sql::kSelectSettingsForCache;
+userver::storages::postgres::Query ConfigCachePolicy::GetQuery() {
+  return uservice_dynconf::sql::kSelectSettingsForCache;
+}
 
 void ConfigCacheContainer::insert_or_assign(Key &&key, Config &&config) {
   auto config_ptr = std::make_shared<const Config>(std::move(config));
