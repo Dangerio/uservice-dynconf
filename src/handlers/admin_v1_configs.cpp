@@ -43,7 +43,7 @@ RequestData ParseRequest(const userver::formats::json::Value &request) {
   return result;
 }
 
-bool ConsitstsOfIdsFromConfigs(
+bool ConsistsOfIdsFromConfigs(
     const std::unordered_set<std::string> &kill_switches,
     const userver::formats::json::Value &configs) {
   for (const auto &kill_switch : kill_switches) {
@@ -106,9 +106,9 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
     return uservice_dynconf::utils::MakeError(
         "400", "Fields 'configs' and 'service' are required");
   }
-  if (!ConsitstsOfIdsFromConfigs(request_data.kill_switches_enabled,
+  if (!ConsistsOfIdsFromConfigs(request_data.kill_switches_enabled,
                                  request_data.configs) ||
-      !ConsitstsOfIdsFromConfigs(request_data.kill_switches_disabled,
+      !ConsistsOfIdsFromConfigs(request_data.kill_switches_disabled,
                                  request_data.configs)) {
     http_response.SetStatus(userver::server::http::HttpStatus::kBadRequest);
     return uservice_dynconf::utils::MakeError(
