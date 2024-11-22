@@ -1,6 +1,7 @@
 #include <handlers/admin_v1_configs_delete.hpp>
 
 #include <string>
+#include <vector>
 
 #include <userver/formats/json/value.hpp>
 #include <userver/server/http/http_status.hpp>
@@ -14,24 +15,6 @@
 
 namespace uservice_dynconf::handlers::admin_v1_configs_delete::post {
 
-namespace {
-
-struct RequestData {
-  std::vector<std::string> ids{};
-  std::string service{};
-};
-
-RequestData ParseRequest(const userver::formats::json::Value &request) {
-  auto &&body = request.As<AdminConfigsDeleteRequestBody>();
-
-  RequestData result;
-  result.ids = body.ids.value_or(std::vector<std::string>({}));
-  result.service = body.service.value_or(std::string({}));
-  return result;
-}
-
-} // namespace
-
 Handler::Handler(const userver::components::ComponentConfig &config,
                  const userver::components::ComponentContext &context)
     : HttpHandlerJsonBase(config, context),
@@ -44,17 +27,20 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
     const userver::server::http::HttpRequest &request,
     const userver::formats::json::Value &request_json,
     userver::server::request::RequestContext &) const {
-  const auto request_data = ParseRequest(request_json);
+  auto &&request_data = request_json.As<AdminConfigsDeleteRequestBody>();
+  std::vector<std::string> ids =
+      request_data.ids.value_or(std::vector<std::string>({}));
+  std::string service = request_data.service.value_or(std::string({}));
+
   auto &http_response = request.GetHttpResponse();
-  if (request_data.ids.empty() || request_data.service.empty()) {
+  if (ids.empty() || service.empty()) {
     http_response.SetStatus(userver::server::http::HttpStatus::kBadRequest);
     return uservice_dynconf::utils::MakeError(
         "400", "Fields 'ids' and 'service' are required");
   }
 
   cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                    uservice_dynconf::sql::kDeleteConfigValues,
-                    request_data.service, request_data.ids);
+                    uservice_dynconf::sql::kDeleteConfigValues, service, ids);
 
   http_response.SetStatus(userver::server::http::HttpStatus::kNoContent);
   return {};
