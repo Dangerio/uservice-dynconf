@@ -1,13 +1,16 @@
-#include "admin_v1_configs_delete.hpp"
-#include "docs/api/api.hpp"
-#include "userver/formats/json/value.hpp"
-#include "userver/server/http/http_status.hpp"
-#include "userver/storages/postgres/cluster.hpp"
-#include "userver/storages/postgres/component.hpp"
+#include <handlers/admin_v1_configs_delete.hpp>
 
-#include "uservice_dynconf/sql_queries.hpp"
-#include "utils/make_error.hpp"
 #include <string>
+
+#include <userver/formats/json/value.hpp>
+#include <userver/server/http/http_status.hpp>
+#include <userver/storages/postgres/cluster.hpp>
+#include <userver/storages/postgres/component.hpp>
+
+#include <docs/api/api.hpp>
+#include <uservice_dynconf/sql_queries.hpp>
+
+#include <utils/make_error.hpp>
 
 namespace uservice_dynconf::handlers::admin_v1_configs_delete::post {
 

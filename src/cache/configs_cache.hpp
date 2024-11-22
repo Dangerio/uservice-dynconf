@@ -2,10 +2,11 @@
 
 #include <memory>
 #include <unordered_map>
+
 #include <userver/cache/base_postgres_cache.hpp>
 #include <userver/storages/postgres/io/chrono.hpp>
 
-#include "models/config.hpp"
+#include <models/config.hpp>
 
 namespace uservice_dynconf::cache::settings_cache {
 

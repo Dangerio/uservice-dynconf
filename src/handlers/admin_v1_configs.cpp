@@ -1,17 +1,19 @@
-#include "admin_v1_configs.hpp"
-#include "docs/api/api.hpp"
-#include "userver/formats/json/inline.hpp"
-#include "userver/formats/json/value.hpp"
-#include "userver/formats/yaml/value_builder.hpp"
-#include "userver/storages/postgres/cluster.hpp"
-#include "userver/storages/postgres/component.hpp"
+#include <handlers/admin_v1_configs.hpp>
 
-#include "models/config.hpp"
-#include "uservice_dynconf/sql_queries.hpp"
-#include "utils/make_error.hpp"
 #include <string>
 #include <unordered_set>
-#include <vector>
+
+#include <userver/formats/json/inline.hpp>
+#include <userver/formats/json/value.hpp>
+#include <userver/formats/yaml/value_builder.hpp>
+#include <userver/storages/postgres/cluster.hpp>
+#include <userver/storages/postgres/component.hpp>
+
+#include <docs/api/api.hpp>
+#include <uservice_dynconf/sql_queries.hpp>
+
+#include <models/config.hpp>
+#include <utils/make_error.hpp>
 
 namespace uservice_dynconf::handlers::admin_v1_configs::post {
 
@@ -107,9 +109,9 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
         "400", "Fields 'configs' and 'service' are required");
   }
   if (!ConsistsOfIdsFromConfigs(request_data.kill_switches_enabled,
-                                 request_data.configs) ||
+                                request_data.configs) ||
       !ConsistsOfIdsFromConfigs(request_data.kill_switches_disabled,
-                                 request_data.configs)) {
+                                request_data.configs)) {
     http_response.SetStatus(userver::server::http::HttpStatus::kBadRequest);
     return uservice_dynconf::utils::MakeError(
         "400", "Fields 'kill_switches_enabled' and 'kill_switches_disabled' "
