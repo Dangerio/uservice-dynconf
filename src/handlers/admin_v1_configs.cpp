@@ -86,11 +86,13 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
         "400", "Fields 'configs' and 'service' are required");
   }
 
-  auto configs = request_data.configs.value().extra;
-  auto kill_switches_enabled = request_data.kill_switches_enabled.value_or(
-      std::unordered_set<std::string>{});
-  auto kill_switches_disabled = request_data.kill_switches_disabled.value_or(
-      std::unordered_set<std::string>{});
+  const auto configs = request_data.configs.value().extra;
+  const auto kill_switches_enabled =
+      request_data.kill_switches_enabled.value_or(
+          std::unordered_set<std::string>{});
+  const auto kill_switches_disabled =
+      request_data.kill_switches_disabled.value_or(
+          std::unordered_set<std::string>{});
 
   if (!ConsistsOfIdsFromConfigs(kill_switches_enabled, configs) ||
       !ConsistsOfIdsFromConfigs(kill_switches_disabled, configs)) {
