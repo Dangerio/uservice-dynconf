@@ -28,19 +28,18 @@ userver::formats::json::Value Handler::HandleRequestJsonThrow(
     const userver::formats::json::Value &request_json,
     userver::server::request::RequestContext &) const {
   auto &&request_data = request_json.As<AdminConfigsDeleteRequestBody>();
-  std::vector<std::string> ids =
-      request_data.ids.value_or(std::vector<std::string>({}));
-  std::string service = request_data.service.value_or(std::string({}));
-
   auto &http_response = request.GetHttpResponse();
-  if (ids.empty() || service.empty()) {
+  if (!request_data.ids.has_value() || request_data.ids.value().empty() ||
+      !request_data.service.has_value() ||
+      request_data.service.value().empty()) {
     http_response.SetStatus(userver::server::http::HttpStatus::kBadRequest);
     return uservice_dynconf::utils::MakeError(
         "400", "Fields 'ids' and 'service' are required");
   }
 
   cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                    uservice_dynconf::sql::kDeleteConfigValues, service, ids);
+                    uservice_dynconf::sql::kDeleteConfigValues,
+                    request_data.service.value(), request_data.ids.value());
 
   http_response.SetStatus(userver::server::http::HttpStatus::kNoContent);
   return {};
