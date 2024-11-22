@@ -1,7 +1,6 @@
 #include <handlers/admin_v1_configs_delete.hpp>
 
 #include <string>
-#include <vector>
 
 #include <userver/formats/json/value.hpp>
 #include <userver/server/http/http_status.hpp>
